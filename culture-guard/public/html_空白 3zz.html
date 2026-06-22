@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Culture Guard — 跨文化沟通避雷针 · 商务冷知识</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f7f9;
+    --ink:#14171c;
+    --steel:#757575;
+    --steel-soft:#9a9a9a;
+    --blue:#3363e9;
+    --blue-deep:#1d2a52;
+    --line:#e3e5ea;
+    --card:#ffffff;
+    --shadow: 0 30px 60px -20px rgba(20,23,28,0.25), 0 10px 20px -10px rgba(20,23,28,0.12);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,.disp{
+    font-family:'Space Grotesk', sans-serif;
+    letter-spacing:-0.01em;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  img{ display:block; max-width:100%; }
+ 
+  /* ---------- 所有内容置于最上层 ---------- */
+  header, main, footer, section, .hero, .band {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ---------- ripple canvas ---------- */
+  #ripple-canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:9999;
+    pointer-events:none;
+    mix-blend-mode:multiply;
+    opacity:1;
+  }
+
+  /* ---------- loading screen ---------- */
+  #loader{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    transition:opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #loader.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  #loader .logo-wrap{
+    width:min(58vw, 420px);
+    animation:loadShake 1.15s ease-in-out infinite;
+    transform-origin:50% 60%;
+  }
+  #loader .logo-wrap img{ width:100%; }
+  #loader .load-row{
+    display:flex;
+    align-items:baseline;
+    gap:2px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:14px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--steel);
+  }
+  #loader .dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--blue);
+    display:inline-block;
+    margin-left:4px;
+    animation:dotPulse 1.2s ease-in-out infinite;
+  }
+  #loader .dot:nth-child(2){ animation-delay:0.18s; background:var(--steel); }
+  #loader .dot:nth-child(3){ animation-delay:0.36s; }
+
+  @keyframes loadShake{
+    0%{ transform:rotate(0deg) translateX(0); }
+    15%{ transform:rotate(-1.6deg) translateX(-4px); }
+    35%{ transform:rotate(1.4deg) translateX(3px); }
+    55%{ transform:rotate(-1deg) translateX(-2px); }
+    75%{ transform:rotate(1.2deg) translateX(2px); }
+    100%{ transform:rotate(0deg) translateX(0); }
+  }
+  @keyframes dotPulse{
+    0%,80%,100%{ opacity:0.25; transform:translateY(0); }
+    40%{ opacity:1; transform:translateY(-3px); }
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:6px clamp(20px,5vw,64px);
+    background:rgba(246,247,249,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  header .brand{ display:flex; align-items:center; gap:10px; }
+  header .brand img{ height:50px; width:auto; }
+  nav{ display:flex; align-items:center; gap:clamp(18px,3vw,40px); }
+  nav a.nav-link{
+    font-size:14px; font-weight:500; color:var(--ink);
+    position:relative; padding:4px 0;
+  }
+  nav a.nav-link::after{
+    content:''; position:absolute; left:0; bottom:-2px; width:0; height:2px;
+    background:var(--blue); transition:width 0.25s ease;
+  }
+  nav a.nav-link:hover::after{ width:100%; }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    position:relative;
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600; font-size:14px; letter-spacing:0.01em;
+    padding:13px 26px;
+    border-radius:999px;
+    border:1.5px solid var(--ink);
+    cursor:pointer;
+    overflow:hidden;
+    background:var(--ink);
+    color:#fff;
+    transition:transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s ease, background 0.28s ease, color 0.28s ease, border-color .28s ease;
+    z-index:1;
+  }
+  .btn span{ position:relative; z-index:2; }
+  .btn::before{
+    content:'';
+    position:absolute;
+    top:0; left:-30%;
+    width:160%; height:100%;
+    background:linear-gradient(100deg, transparent 40%, var(--blue) 50%, transparent 60%);
+    transform:translateX(-60%);
+    transition:transform 0.5s ease;
+    z-index:1;
+  }
+  .btn:hover{
+    transform:scale(1.06);
+    box-shadow:0 14px 30px -10px rgba(51,99,233,0.45);
+    background:var(--blue);
+    border-color:var(--blue);
+  }
+  .btn:hover::before{ transform:translateX(60%); }
+  .btn.ghost{
+    background:transparent;
+    color:var(--ink);
+    border-color:var(--line);
+  }
+  .btn.ghost::before{ background:linear-gradient(100deg, transparent 40%, rgba(117,117,117,0.25) 50%, transparent 60%); }
+  .btn.ghost:hover{
+    background:rgba(117,117,117,0.08);
+    color:var(--ink);
+    border-color:var(--steel);
+    box-shadow:0 14px 26px -14px rgba(20,23,28,0.25);
+  }
+  .btn.small{ padding:10px 18px; font-size:13px; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:clamp(70px,12vh,140px) clamp(20px,5vw,64px) clamp(60px,8vh,100px);
+    display:flex; flex-direction:column; align-items:flex-start;
+    max-width:1180px; margin:0 auto;
+  }
+  .eyebrow{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--steel); margin-bottom:22px;
+  }
+  .eyebrow .chip{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--blue);
+    box-shadow:0 0 0 4px rgba(51,99,233,0.18);
+  }
+  .hero h1{
+    font-size:clamp(38px, 6.4vw, 76px);
+    line-height:1.18;
+    font-weight:700;
+    max-width:16ch;
+  }
+  .hero h1 .accent{ color:var(--blue); }
+  .hero p.lead{
+    margin-top:26px;
+    font-size:clamp(16px,1.6vw,19px);
+    color:#454953;
+    max-width:46ch;
+    line-height:1.65;
+  }
+  .hero .cta-row{ display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; }
+
+  .hero-mark{
+    margin-top:64px;
+    width:100%;
+    max-width:640px;
+    opacity:0.95;
+  }
+  .hero-mark img{ width:100%; }
+
+  /* diagonal stripe divider — signature motif */
+  .stripe-divider{
+    height:46px;
+    width:100%;
+    background:repeating-linear-gradient(-35deg, var(--steel) 0 26px, var(--blue) 26px 30px, transparent 30px 64px);
+    opacity:0.9;
+    clip-path:polygon(0 30%, 100% 0%, 100% 70%, 0% 100%);
+  }
+
+  /* ---------- section shell ---------- */
+  section{ padding:clamp(60px,9vh,110px) clamp(20px,5vw,64px); max-width:1180px; margin:0 auto; }
+  .section-head{ max-width:640px; margin-bottom:48px; }
+  .section-head .tag{
+    font-family:'Space Grotesk',sans-serif; font-size:13px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--blue); margin-bottom:14px; display:block;
+  }
+  .section-head h2{ font-size:clamp(26px,3.4vw,40px); font-weight:700; line-height:1.15; }
+  .section-head p{ margin-top:14px; color:#5a5e68; font-size:15.5px; line-height:1.6; }
+
+  /* ---------- pillars / steps ---------- */
+  .steps{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:18px; overflow:hidden;
+  }
+  .step{
+    background:var(--card); padding:34px 28px 30px;
+    transition:background 0.3s ease, transform .3s ease;
+    position:relative;
+  }
+  .step:hover{ background:#fbfbfd; }
+  .step .num{
+    font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--steel-soft);
+    letter-spacing:.12em;
+  }
+  .step h3{ font-size:20px; margin-top:16px; margin-bottom:10px; font-weight:600; }
+  .step p{ font-size:14.5px; color:#5a5e68; line-height:1.6; }
+  .step .corner{
+    position:absolute; top:0; right:0; width:0; height:0;
+    border-style:solid; border-width:0 26px 26px 0;
+    border-color:transparent var(--line) transparent transparent;
+    transition:border-color .3s ease;
+  }
+  .step:hover .corner{ border-color:transparent var(--blue) transparent transparent; }
+
+/* ---------- 核心能力区域 (替换此部分) ---------- */
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.card {
+  background: #fcf9f0; /* 淡黄色皱褶纸张底色 */
+  border: 1px solid rgba(0,0,0,0.03);
+  border-radius: 2px 8px 8px 2px; /* 纸张边缘不平整的感觉 */
+  padding: 28px 24px 24px;
+  position: relative;
+  box-shadow: 2px 4px 10px rgba(0,0,0,0.15), -2px -2px 6px rgba(255,255,255,0.8);
+  transform: rotate(var(--rot, 0deg)); /* 控制每个卡片的倾斜角度 */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 0;
+  overflow: visible;
+}
+
+.card:hover {
+  transform: rotate(var(--rot, 0deg)) scale(1.02);
+  box-shadow: 4px 8px 16px rgba(0,0,0,0.25);
+  border-color: rgba(0,0,0,0.05);
+}
+
+/* 卡片顶部的彩色胶带 */
+.card::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 44px;
+  height: 16px;
+  background: var(--tape-color, #aaccff);
+  opacity: 0.8;
+  border-radius: 1px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+/* 不同卡片赋予不同的旋转角度和胶带颜色 */
+.card:nth-child(1) { --rot: -2.5deg; --tape-color: #ffccaa; }
+.card:nth-child(2) { --rot: 1.2deg;  --tape-color: #aaccff; }
+.card:nth-child(3) { --rot: -1.5deg; --tape-color: #ffffaa; }
+.card:nth-child(4) { --rot: 2deg;    --tape-color: #ffaaaa; }
+.card:nth-child(5) { --rot: -0.8deg; --tape-color: #ccffcc; }
+.card:nth-child(6) { --rot: 0.5deg;  --tape-color: #ffccaa; }
+
+/* 图钉样式 */
+.card .pin {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  background: #f3d346; /* 图钉头颜色 */
+  border-radius: 50%;
+  box-shadow: inset -2px -2px 4px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15);
+  z-index: 3;
+}
+
+/* 部分图钉在右侧，模拟随机感 */
+.card:nth-child(even) .pin {
+  left: auto;
+  right: 12px;
+}
+
+.card .ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%; /* 圆形图章感 */
+  margin-bottom: 16px;
+  background: repeating-linear-gradient(-35deg, #e5e5e5 0 5px, #5a5e68 5px 7px, transparent 7px 14px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+  /* ---------- dark band ---------- */
+  .band{
+    background:var(--blue-deep);
+    color:#fff;
+    border-radius:24px;
+    margin:0 clamp(0px,0vw,0px);
+    padding:clamp(46px,7vw,76px) clamp(24px,6vw,72px);
+    display:flex; align-items:center; justify-content:space-between; gap:40px;
+    flex-wrap:wrap;
+    position:relative;
+    overflow:hidden;
+  }
+  .band::after{
+    content:'';
+    position:absolute; right:-10%; top:-30%; width:60%; height:160%;
+    background:repeating-linear-gradient(-35deg, rgba(255,255,255,0.05) 0 30px, rgba(51,99,233,0.35) 30px 36px, transparent 36px 72px);
+    transform:rotate(0deg);
+  }
+  .band h2{ font-size:clamp(24px,3vw,34px); max-width:18ch; position:relative; z-index:2; }
+  .band p{ color:#c4c9e0; margin-top:12px; max-width:40ch; font-size:15px; position:relative; z-index:2; }
+  .band .band-cta{ position:relative; z-index:2; }
+  .band .btn{ border-color:#fff; }
+  .band .btn.ghost{ color:#fff; border-color:rgba(255,255,255,0.35); }
+  .band .btn.ghost:hover{ background:rgba(255,255,255,0.12); border-color:#fff; }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:36px clamp(20px,5vw,64px) 50px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:16px;
+    max-width:1180px; margin:0 auto;
+  }
+  footer .brand{ display:flex; align-items:center; gap:8px; }
+  footer .brand img{ height:400px; }
+  footer .fine{ font-size:13px; color:var(--steel); }
+  footer .flinks{ display:flex; gap:24px; }
+  footer .flinks a{ font-size:13px; color:#5a5e68; }
+  footer .flinks a:hover{ color:var(--blue); }
+
+  /* ---------- modal (jump page) ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(15,17,22,0.55);
+    backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden;
+    transition:opacity .35s ease, visibility .35s ease;
+    padding:20px;
+  }
+  .modal-overlay.open{ opacity:1; visibility:visible; }
+  .modal-card{
+    width:min(560px, 100%);
+    background:var(--card);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:0;
+    transform:translateY(24px) scale(0.96);
+    transition:transform .4s cubic-bezier(.2,.9,.25,1);
+    overflow:hidden;
+  }
+  .modal-overlay.open .modal-card{ transform:translateY(0) scale(1); }
+  .modal-top{
+    height:8px; width:100%;
+    background:repeating-linear-gradient(-35deg, var(--steel) 0 18px, var(--blue) 18px 21px, transparent 21px 44px);
+  }
+  .modal-body{ padding:38px 36px 34px; }
+  .modal-body .mlogo{ height:24px; margin-bottom:22px; }
+  .modal-body h3{ font-size:23px; font-weight:700; margin-bottom:10px; }
+  .modal-body p{ font-size:14.5px; color:#5a5e68; line-height:1.65; margin-bottom:22px; }
+  .modal-field{ margin-bottom:14px; }
+  .modal-field label{ display:block; font-size:12.5px; color:var(--steel); margin-bottom:6px; letter-spacing:.04em; }
+  .modal-field input{
+    width:100%; padding:12px 14px; border-radius:10px;
+    border:1.5px solid var(--line); font-family:inherit; font-size:14px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+    background:#fbfbfd;
+  }
+  .modal-field input:focus{
+    outline:none; border-color:var(--blue); box-shadow:0 0 0 4px rgba(51,99,233,0.12);
+  }
+  .modal-actions{ display:flex; gap:12px; margin-top:24px; }
+  .modal-close{
+    position:absolute; top:18px; right:18px;
+    width:34px; height:34px; border-radius:50%;
+    border:1px solid var(--line); background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform .25s ease, background .25s ease, border-color .25s ease;
+    font-size:16px; color:var(--steel);
+  }
+  .modal-close:hover{ transform:scale(1.12) rotate(90deg); background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  @media (max-width: 880px){
+    .steps{ grid-template-columns:1fr; }
+    .grid3{ grid-template-columns:1fr; }
+    .band{ flex-direction:column; align-items:flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #loader .logo-wrap{ animation:none; }
+    html{ scroll-behavior:auto; }
+  }
+
+  /* =========================================================
+     IMMERSIVE BACKGROUND SYSTEM
+     Layer 1 liquid gradient · Layer 2 artwork cross-fade ·
+     Layer 3 particle field (canvas) · Layer 4 volumetric glow.
+     Pure visual layer: fixed, z-index:0, pointer-events:none.
+     Never alters layout, text, logo, or any existing system.
+     ========================================================= */
+  :root{
+    --liquid-blue:#8fd6e8;
+    --liquid-pink:#f6c4d8;
+    --liquid-ice:#dff6ff;
+  }
+
+  #bg-system{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    pointer-events:none;
+    background:#ffffff;
+  }
+
+  /* Layer 1 — slow liquid gradient */
+  .bg-gradient{
+    position:absolute;
+    inset:-15%;
+    background:
+      radial-gradient(circle at 22% 28%, var(--liquid-pink) 0%, transparent 42%),
+      radial-gradient(circle at 78% 18%, var(--liquid-blue) 0%, transparent 48%),
+      radial-gradient(circle at 50% 85%, var(--liquid-ice) 0%, transparent 55%),
+      conic-gradient(from 0deg at 50% 50%, #ffffff 0deg, var(--liquid-pink) 90deg, var(--liquid-blue) 180deg, var(--liquid-ice) 270deg, #ffffff 360deg);
+    filter:blur(70px) saturate(115%);
+    opacity:.5;
+    transform:translate3d(0,0,0) rotate(0deg) scale(1.1);
+    will-change:transform;
+    animation:liquidFlow 15s ease-in-out infinite;
+  }
+  @keyframes liquidFlow{
+    0%{ transform:translate3d(0,0,0) rotate(0deg) scale(1.08); }
+    25%{ transform:translate3d(2%,-3%,0) rotate(8deg) scale(1.22); }
+    50%{ transform:translate3d(-3%,2%,0) rotate(-6deg) scale(1.14); }
+    75%{ transform:translate3d(1%,3%,0) rotate(5deg) scale(1.26); }
+    100%{ transform:translate3d(0,0,0) rotate(0deg) scale(1.08); }
+  }
+
+  /* Layer 2 — artwork imagery, cross-fade orchestrated by JS */
+  .bg-imagery{ position:absolute; inset:0; }
+  .bg-img{
+    position:absolute;
+    inset:-6%;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:0;
+    filter:blur(18px) saturate(105%) brightness(1.02);
+    transform:translate3d(0,0,0) scale(1);
+    transition:opacity 4.2s ease, filter 4.2s ease, transform 12s cubic-bezier(.22,.7,.2,1);
+    will-change:opacity, filter, transform;
+    mix-blend-mode:luminosity;
+  }
+  .bg-img.is-active{
+    filter:blur(0px) saturate(108%) brightness(1.03);
+    transform:translate3d(0,0,0) scale(1.08);
+  }
+  .bg-img--eye.is-active{ opacity:.90; }   /* 0.08–0.18 window, never above 0.2 */
+  .bg-img--flora.is-active{ opacity:.50; }
+  .bg-img--grid.is-active{ opacity:.50; }
+
+  /* Layer 4 — volumetric breathing glow */
+  .bg-glow{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(90px);
+    opacity:.3;
+    will-change:transform, opacity;
+    transition:transform 1.6s ease, opacity 1.6s ease;
+  }
+  .bg-glow--a{ width:52vw; height:52vw; left:-12%; top:-14%; background:radial-gradient(circle, var(--liquid-blue), transparent 70%); animation:breatheA 9s ease-in-out infinite; }
+  .bg-glow--b{ width:48vw; height:48vw; right:-10%; bottom:-12%; background:radial-gradient(circle, var(--liquid-pink), transparent 70%); animation:breatheB 11s ease-in-out infinite; }
+  @keyframes breatheA{ 0%,100%{ transform:scale(1); opacity:.26; } 50%{ transform:scale(1.22); opacity:.42; } }
+  @keyframes breatheB{ 0%,100%{ transform:scale(1.1); opacity:.3; } 50%{ transform:scale(1.3); opacity:.46; } }
+  #bg-system.is-transitioning .bg-glow--a{ transform:scale(1.4); opacity:.5; }
+  #bg-system.is-transitioning .bg-glow--b{ transform:scale(1.45); opacity:.55; }
+
+  /* Layer 3 — ambient particle canvas */
+  #particle-canvas{ position:absolute; inset:0; width:100%; height:100%; }
+
+  /* readability wash — sits above artwork, keeps text always legible */
+  .bg-readability{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,.42) 30%, rgba(255,255,255,.5) 70%, rgba(255,255,255,.66) 100%);
+  }
+
+  header{ backdrop-filter:blur(16px) saturate(160%); }
+  .hero .eyebrow, .hero h1, .hero p.lead{ text-shadow:0 1px 24px rgba(255,255,255,.5); }
+
+  /* 标题区域自动渐变遮罩 — guarantees Logo + headline are always
+     the first visual layer the user perceives, regardless of how
+     active the background animation currently is. Purely a
+     backdrop mask: zero impact on layout, text, or logo size. */
+  header,
+  .hero::before,
+  .section-head::before{
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.75),
+        rgba(255,255,255,0.55)
+      );
+  }
+  .hero, .section-head{ position:relative; }
+  .hero::before, .section-head::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  @media (max-width:768px){
+    .bg-gradient{ filter:blur(40px) saturate(110%); }
+    .bg-img{ filter:blur(10px); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .bg-gradient, .bg-glow{ animation:none !important; }
+    .bg-img{ transition:opacity 1.2s ease !important; }
+  }
+</style>
+</head>
+<body>
+ <!-- ===== immersive background system (visual layer only) ===== -->
+ <div id="bg-system" aria-hidden="true">
+   <div class="bg-gradient"></div>
+   <div class="bg-imagery">
+     <div class="bg-img bg-img--eye"   data-parallax="1.3" style="background-image:url('assets/bg-eye.jpg')"></div>
+     <div class="bg-img bg-img--flora" data-parallax="0.6" style="background-image:url('assets/bg-flora.jpg')"></div>
+     <div class="bg-img bg-img--grid"  data-parallax="0.9" style="background-image:url('assets/bg-grid.jpg')"></div>
+   </div>
+   <canvas id="particle-canvas"></canvas>
+   <div class="bg-glow bg-glow--a"></div>
+   <div class="bg-glow bg-glow--b"></div>
+   <div class="bg-readability"></div>
+ </div>
+
+ <canvas id="ripple-canvas"></canvas>
+
+
+ 
+  <!-- ===== 原有：loading screen ===== -->
+  <div id="loader">
+    <div class="logo-wrap"><img src="assets/IMG_2928.png." alt="Culture Guard"></div>
+    <div class="load-row">正在加载<span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+
+
+
+  <header>
+    <div class="brand">
+      <img src="assets/IMG_2928.png." alt="Culture Guard logo">
+    </div>
+    <nav>
+      <nav>
+  <button class="btn small" id="open-modal-nav"><span>Start Guard</span></button>
+</nav>     
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span class="chip"></span>面向国际商务场景的即时决策工具</div>
+      <h1>跨文化沟通避雷针<br><span class="accent">即时决策</span><br>商务冷知识</h1>
+      <p class="lead">它不提供泛泛的文化概述，而是针对邮件措辞、会议安排、赠礼选择、餐桌举止等具体情境，输出可立即执行的行为指引与可复制话术。</p>
+      <div class="cta-row">
+        <button class="btn" id="open-modal-hero"><span>Start Guard</span></button>
+        <a class="btn ghost" href="#pillars"><span>了解工作方式</span></a>
+      </div>
+      <div class="hero-mark"><img src="assets/hero-mark.png" alt=""></div>
+    </section>
+
+    <div class="stripe-divider"></div>
+
+    <section id="pillars">
+      <div class="section-head">
+        <span class="tag">工作方式 · 三步</span>
+        <h2>理解、求证、行动 —— 三步直达</h2>
+        <p>从你输入的简单场景出发，系统默默构建意图图谱，实时检索最新文化信息，最终输出可直接复制使用的建议与话术。</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="corner"></div>
+          <span class="num">01 · 理解意图</span>
+          <h3>理解意图</h3>
+          <p>你给出国家与场景，它做的第一件事，是把这寥寥几个词解析为明确的行动指向。没有复杂的菜单，你只需描述当下的需求，它便知道自己该搜寻什么。</p>
+        </div>
+        <div class="step">
+          <div class="corner"></div>
+          <span class="num">02 · 实时求证</span>
+          <h3>实时求证</h3>
+          <p>接下来，它会向整个网络提出一组具体的问题，而不是依赖一份写定的列表。因为礼节会变，节日会移动，今年的斋月日期和去年不同。它搜索的是当年、当地的最新商务礼仪与时间禁忌，把多条结果汇聚成一份活的信息。这意味着你得到的不是一本旧百科全书，而是一张此刻有效的地图。</p>
+        </div>
+        <div class="step">
+          <div class="corner"></div>
+          <span class="num">03 · 生成行动</span>
+          <h3>生成行动</h3>
+          <p>最后，这些实时信息会与深厚的文化理解融合，并压缩成三件你可以立刻做的事，以及三件你绝不要做的事。与此同时，它直接为你写好一段话术——一封邮件的开头、一句见面时的问候。你不需要理解背后的文化理论，你只需要复制、调整、发送。工具从复杂的文化知识中提取的，是行动。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="guard">
+      <div class="section-head">
+        <span class="tag">核心能力</span>
+        <h2>即时决策的六个引擎</h2>
+        <p>从模糊的商务场景到明确的行动指南，每一步都由专门的模块驱动，Culture Guard确保你得到的不是理论，而是可执行的选择。</p>
+      </div>
+      <div class="grid3">
+        <div class="card">
+       <span class="pin"></span>
+          <div class="ic"></div>
+<h3>情境意图解析</h3>
+      <p>当你输入“沙特 + 初次邮件”，系统自动识别出你的角色（销售/采购）、对方身份和沟通目标，将模糊描述转化为结构化的意图图谱。</p>
+    </div>
+    <div class="card">
+    <span class="pin"></span>
+      <div class="ic"></div>
+      <h3>实时文化情报检索</h3>
+      <p>不依赖静态数据库，而是实时搜索当年、当地的商务礼仪、节假日、时间禁忌，确保建议始终贴合最新的文化动态。</p>
+    </div>
+    <div class="card">
+      <span class="pin"></span>
+      <div class="ic"></div>
+      <h3>禁忌与礼仪清单</h3>
+      <p>为每个场景输出三件“必做”和“绝不做”的事项清单，简明扼要，避免冗长的文化背景叙述，直接指导行为。</p>
+    </div>
+    <div class="card">
+      <span class="pin"></span>
+      <div class="ic"></div>
+      <h3>可复制话术生成</h3>
+      <p>自动生成一段可直接复制使用的沟通话术，包括邮件开头、见面问候或赠礼附言，只需微调即可发送。</p>
+    </div>
+    <div class="card">
+      <span class="pin"></span>
+      <div class="ic"></div>
+      <h3>时效性信息校验</h3>
+      <p>针对斋月、夏令时、当地节日等时间敏感信息，进行实时校验并标注“当前年份”建议，避免踩入过时的习俗陷阱。</p>
+    </div>
+    <div class="card">
+       <span class="pin"></span>
+      <div class="ic"></div>
+      <h3>四个场景深度分析</h3>
+      <p>覆盖邮件措辞、会议安排、赠礼选择、餐桌举止这四个高频国际商务情境，并提供针对不同国家（如英国、沙特）的定制化方案。</p>
+    </div>
+  </div>
+</section>
+  </main>
+
+  <footer id="contact">
+    <div class="brand">
+      <img src="assets/IMG_2928.png." alt="Culture Guard">
+        <p>现在来试试吧</p>
+        <div class="modal-field">
+          <label for="email">工作邮箱</label>
+          <input id="email" type="email" placeholder="you@studio.com">
+        </div>
+        <div class="modal-field">
+          <label for="org">名称</label>
+          <input id="org" type="text" placeholder="例如：用户123">
+        </div>
+        <div class="modal-actions">
+          <button class="btn" style="flex:1; justify-content:center;"><span>START GUARD</span></button>
+          <button class="btn ghost" style="flex:1; justify-content:center;" id="modal-cancel"><span>稍后再说</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------- loading sequence ----------
+  window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+    setTimeout(() => { loader.classList.add('hide'); }, 1900);
+  });
+
+  // ---------- modal control ----------
+  const overlay = document.getElementById('modal-overlay');
+  function openModal(){ overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeModal(){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+  ['open-modal-nav','open-modal-hero','open-modal-band'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('click', openModal);
+  });
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+
+  // ---------- water ripple effect on cursor move ----------
+  const canvas = document.getElementById('ripple-canvas');
+  const ctx = canvas.getContext('2d');
+  let ripples = [];
+  let lastSpawn = 0;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize(){
+    canvas.width = window.innerWidth * devicePixelRatio;
+    canvas.height = window.innerHeight * devicePixelRatio;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const palette = ['143,214,232', '246,196,216'];
+  let colorIdx = 0;
+
+  function spawnRipple(x,y){
+    ripples.push({
+      x, y,
+      radius: 4,
+      maxRadius: 70 + Math.random()*50,
+      alpha: 0.08,
+      color: palette[colorIdx % palette.length],
+      lineWidth: 2.4
+    });
+    colorIdx++;
+    if(ripples.length > 3) ripples.shift();
+  }
+
+  function pointerMove(x,y){
+    const now = performance.now();
+    if(now - lastSpawn > 200){
+      spawnRipple(x,y);
+      lastSpawn = now;
+    }
+  }
+
+  window.addEventListener('mousemove', (e)=>{ if(!reduceMotion) pointerMove(e.clientX, e.clientY); });
+  window.addEventListener('touchmove', (e)=>{
+    if(reduceMotion) return;
+    const t = e.touches[0];
+    if(t) pointerMove(t.clientX, t.clientY);
+  }, {passive:true});
+
+  function draw(){
+    ctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    ripples.forEach(r=>{
+      r.radius += (r.maxRadius - r.radius) * 0.045 + 0.35;
+      r.alpha *= 0.965;
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.radius, 0, Math.PI*2);
+      ctx.lineWidth = r.lineWidth;
+      ctx.strokeStyle = `rgba(${r.color}, ${r.alpha})`;
+      ctx.stroke();
+    });
+    ripples = ripples.filter(r => r.alpha > 0.004);
+    requestAnimationFrame(draw);
+  }
+  if(!reduceMotion) draw();
+</script>
+
+<script>
+  /* =========================================================
+     Immersive background engine.
+     - Liquid gradient: pure CSS animation (handled above).
+     - Artwork cross-fade: IntersectionObserver maps the visible
+       section to the artwork that represents it, plus a slow
+       weighted idle rotation so the scene never feels static.
+     - Particle field: lightweight canvas, desktop 80-120 /
+       mobile 20-40 particles, auto-pauses off-screen.
+     - Pointer parallax: max 20px, eye "watches" the cursor,
+       flora drifts softly, grid gains depth.
+     This layer is purely visual: it never touches text, layout,
+     the logo, button labels, the Start Guard flow, or the
+     existing ripple system. It also never reloads, so it stays
+     continuous across all interactions (SPA-style persistence).
+     ========================================================= */
+  (function(){
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = () => window.innerWidth < 768;
+
+    const bgSystem  = document.getElementById('bg-system');
+    const gradientEl = document.querySelector('.bg-gradient');
+    const imgLayers = Array.from(document.querySelectorAll('.bg-img'));
+    if(!bgSystem || !imgLayers.length) return;
+
+    const LAYER = { eye:0, flora:1, grid:2 };
+    const WEIGHTS = [0.4, 0.3, 0.3]; // 眼球40% · 花海30% · 建筑线稿30%
+    let activeIdx = -1;
+    let idleTimer = null;
+
+    function showLayer(idx){
+      if(idx === activeIdx) return;
+      activeIdx = idx;
+      imgLayers.forEach((el,i)=> el.classList.toggle('is-active', i===idx));
+      bgSystem.classList.add('is-transitioning');
+      clearTimeout(bgSystem._t);
+      bgSystem._t = setTimeout(()=> bgSystem.classList.remove('is-transitioning'), 4200);
+      restartIdle();
+    }
+
+    function weightedNext(){
+      const others = [0,1,2].filter(i=>i!==activeIdx);
+      const w = others.map(i=>WEIGHTS[i]);
+      const r = Math.random()*(w[0]+w[1]);
+      return r < w[0] ? others[0] : others[1];
+    }
+
+    function restartIdle(){
+      clearTimeout(idleTimer);
+      if(reduceMotion) return;
+      idleTimer = setTimeout(()=> showLayer(weightedNext()), 13000 + Math.random()*5000);
+    }
+
+    // Contextual mapping: which section is on screen decides which
+    // artwork represents this part of the digital space right now.
+    const sectionMap = [
+      { el: document.querySelector('.hero'),    layer: LAYER.eye   },
+      { el: document.getElementById('pillars'), layer: LAYER.grid  },
+      { el: document.getElementById('guard'),   layer: LAYER.grid  },
+      { el: document.getElementById('contact'), layer: LAYER.flora }
+    ].filter(s => s.el);
+
+    if('IntersectionObserver' in window && sectionMap.length){
+      const io = new IntersectionObserver((entries)=>{
+        let best = null;
+        entries.forEach(entry=>{
+          if(entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) best = entry;
+        });
+        if(best){
+          const match = sectionMap.find(s=>s.el===best.target);
+          if(match) showLayer(match.layer);
+        }
+      }, { threshold:[0.35,0.6] });
+      sectionMap.forEach(s=> io.observe(s.el));
+    }
+
+    showLayer(LAYER.eye);
+
+    /* ---------------- pointer parallax (max 20px) ---------------- */
+    let pointerX = 0, pointerY = 0, targetX = 0, targetY = 0;
+    const MAX_PARALLAX = 20;
+
+    function onPointer(x, y){
+      targetX = (x / window.innerWidth - 0.5) * 2;
+      targetY = (y / window.innerHeight - 0.5) * 2;
+    }
+    window.addEventListener('mousemove', (e)=> onPointer(e.clientX, e.clientY));
+    window.addEventListener('touchmove', (e)=>{
+      const t = e.touches[0];
+      if(t) onPointer(t.clientX, t.clientY);
+    }, { passive:true });
+
+    function parallaxTick(){
+      pointerX += (targetX - pointerX) * 0.06;
+      pointerY += (targetY - pointerY) * 0.06;
+      const px = pointerX * MAX_PARALLAX;
+      const py = pointerY * MAX_PARALLAX;
+
+      if(gradientEl) gradientEl.style.translate = `${px*0.4}px ${py*0.4}px`;
+
+      imgLayers.forEach(el=>{
+        const f = parseFloat(el.dataset.parallax || '1');
+        const isEye = el.classList.contains('bg-img--eye');
+        // the eye tracks toward the cursor (observation), the rest
+        // drift the opposite way for a gentle depth-of-field feel
+        const ox = isEye ? px*f : -px*f;
+        const oy = isEye ? py*f : -py*f;
+        el.style.translate = `${ox}px ${oy}px`;
+      });
+      requestAnimationFrame(parallaxTick);
+    }
+    if(!reduceMotion) requestAnimationFrame(parallaxTick);
+
+    /* ---------------- ambient particle field ---------------- */
+    const pCanvas = document.getElementById('particle-canvas');
+    const pCtx = pCanvas.getContext('2d');
+    let particles = [];
+
+    function particleCount(){
+      if(reduceMotion) return 0;
+      return isMobile() ? (20 + Math.floor(Math.random()*20)) : (80 + Math.floor(Math.random()*40));
+    }
+
+    function resizeParticles(){
+      pCanvas.width  = window.innerWidth  * devicePixelRatio;
+      pCanvas.height = window.innerHeight * devicePixelRatio;
+      pCanvas.style.width  = window.innerWidth + 'px';
+      pCanvas.style.height = window.innerHeight + 'px';
+      pCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    }
+
+    function seedParticles(){
+      const n = particleCount();
+      const palette = ['143,214,232', '246,196,216', '255,255,255'];
+      particles = Array.from({length:n}, ()=>({
+        x: Math.random()*window.innerWidth,
+        y: Math.random()*window.innerHeight,
+        r: 0.6 + Math.random()*2.2,
+        vx: (Math.random()-0.5)*0.12,
+        vy: (Math.random()-0.5)*0.12,
+        a: 0.15 + Math.random()*0.35,
+        c: palette[Math.floor(Math.random()*palette.length)]
+      }));
+    }
+
+    function drawParticles(){
+      if(document.hidden){ requestAnimationFrame(drawParticles); return; }
+      pCtx.clearRect(0,0,window.innerWidth, window.innerHeight);
+      const boost = bgSystem.classList.contains('is-transitioning') ? 1.6 : 1;
+      particles.forEach(p=>{
+        p.x += p.vx; p.y += p.vy;
+        if(p.x < -10) p.x = window.innerWidth+10;
+        if(p.x > window.innerWidth+10) p.x = -10;
+        if(p.y < -10) p.y = window.innerHeight+10;
+        if(p.y > window.innerHeight+10) p.y = -10;
+        pCtx.beginPath();
+        pCtx.arc(p.x, p.y, p.r*boost, 0, Math.PI*2);
+        pCtx.fillStyle = `rgba(${p.c}, ${Math.min(p.a*boost,0.9)})`;
+        pCtx.shadowColor = `rgba(${p.c}, ${p.a})`;
+        pCtx.shadowBlur = 6;
+        pCtx.fill();
+      });
+      requestAnimationFrame(drawParticles);
+    }
+
+    resizeParticles();
+    seedParticles();
+    let resizeT;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(resizeT);
+      resizeT = setTimeout(()=>{ resizeParticles(); seedParticles(); }, 200);
+    });
+
+    if(!reduceMotion && particles.length) requestAnimationFrame(drawParticles);
+  })();
+</script>
+</body>
+</html>
+
